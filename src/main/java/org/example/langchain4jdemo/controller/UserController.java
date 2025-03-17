@@ -78,7 +78,7 @@ public class UserController {
     
     @Operation(
         summary = "新增用户",
-        description = "根据用户名称、性别和生日新增用户",
+        description = "根据用户名称、性别、身份证号和生日新增用户",
         responses = {
             @ApiResponse(
                 responseCode = "201", 
@@ -98,6 +98,7 @@ public class UserController {
         User user = new User();
         user.setName(request.getName());
         user.setGender(request.getGender());
+        user.setIdCard(request.getIdCard());
         user.setBirthday(request.getBirthday());
         
         User createdUser = userService.createUser(user);
