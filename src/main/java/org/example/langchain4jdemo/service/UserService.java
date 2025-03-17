@@ -21,4 +21,9 @@ public class UserService {
     public int deleteUsersByIds(List<Integer> ids) {
         return userMapper.deleteBatchIds(ids);
     }
+    
+    public User createUser(User user) {
+        userMapper.insert(user);
+        return user;
+    }
 }
