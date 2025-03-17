@@ -19,6 +19,11 @@ public class CreateUserRequest {
     private String gender;
     
     /**
+     * User's ID card number
+     */
+    private String idCard;
+    
+    /**
      * User's birthday
      */
     private Date birthday;
