@@ -7,15 +7,10 @@ spring:
     url: jdbc:mysql://localhost:3306/test?useSSL=false&characterEncoding=utf-8
     username: root
     password: 123456
-  # MyBatis-Plus配置
-  mybatis-plus:
+  # MyBatis配置
+  mybatis:
     mapper-locations: classpath:mapper/*.xml
     type-aliases-package: org.example.langchain4jdemo.entity
-    configuration:
-      map-underscore-to-camel-case: true
-    global-config:
-      db-config:
-        id-type: auto
 server:
   port: 8080
 
