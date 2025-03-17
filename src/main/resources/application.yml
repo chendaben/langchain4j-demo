@@ -5,8 +5,8 @@ spring:
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
     url: jdbc:mysql://localhost:3306/test?useSSL=false&characterEncoding=utf-8
-    username: ${MYSQL_USERNAME:root}
-    password: ${MYSQL_PASSWORD:password}
+    username: root
+    password: 123456
   # MyBatis-Plus配置
   mybatis-plus:
     mapper-locations: classpath:mapper/*.xml
@@ -22,7 +22,7 @@ server:
 langchain4j:
   open-ai:
     chat-model:
-      api-key: ${DEEPSEEK_API_KEY:your-api-key-here}
+      api-key: sk-6dceb08e41f0486687c2645e5b66be48
       base-url: https://api.deepseek.com/v1
       model-name: deepseek-chat
       log-requests: true
