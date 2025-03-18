@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS pet (
     breed VARCHAR(255) COMMENT '宠物品种',
     gender VARCHAR(50) COMMENT '宠物性别',
     color VARCHAR(100) COMMENT '宠物颜色',
-    age INT COMMENT '宠物年龄',
+    birth_date DATE COMMENT '宠物出生日期',
     description TEXT COMMENT '宠物描述',
     lost_time DATETIME COMMENT '走失时间',
     lost_location VARCHAR(255) COMMENT '走失地点',
