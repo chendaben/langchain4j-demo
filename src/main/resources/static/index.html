@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>宠物走失登记系统</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>宠物走失登记系统</h1>
+            <nav>
+                <ul>
+                    <li><a href="index.html">首页</a></li>
+                    <li><a href="pet-register.html">登记走失</a></li>
+                    <li><a href="my-pets.html">我的宠物</a></li>
+                    <li><a href="notifications.html">通知 <span id="notificationBadge"></span></a></li>
+                    <li><a href="#" id="logoutBtn">退出登录</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div id="message" style="display: none;"></div>
+        
+        <div class="search-section">
+            <h2>搜索走失宠物</h2>
+            <div class="form-group">
+                <input type="text" id="searchKeyword" class="form-control" placeholder="输入宠物名称、品种或走失地点">
+                <button id="searchBtn" class="btn">搜索</button>
+            </div>
+            
+            <div class="filter-section">
+                <h3>筛选</h3>
+                <div class="form-group">
+                    <label for="petType">宠物类型</label>
+                    <select id="petType" class="form-control">
+                        <option value="">全部</option>
+                        <option value="狗">狗</option>
+                        <option value="猫">猫</option>
+                        <option value="鸟">鸟</option>
+                        <option value="其他">其他</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="petStatus">状态</label>
+                    <select id="petStatus" class="form-control">
+                        <option value="">全部</option>
+                        <option value="LOST">走失中</option>
+                        <option value="FOUND">已找回</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="startTime">走失开始时间</label>
+                    <input type="datetime-local" id="startTime" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="endTime">走失结束时间</label>
+                    <input type="datetime-local" id="endTime" class="form-control">
+                </div>
+                <button id="filterBtn" class="btn">筛选</button>
+            </div>
+        </div>
+        
+        <div class="pets-section">
+            <h2>走失宠物列表</h2>
+            <div id="petsList"></div>
+            <div class="pagination">
+                <button id="prevPage" class="btn">上一页</button>
+                <span id="currentPage">1</span>
+                <button id="nextPage" class="btn">下一页</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="js/utils.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            Utils.redirectIfNotLoggedIn();
+            
+            const currentUser = Utils.getCurrentUser();
+            let currentPage = 1;
+            const pageSize = 10;
+            
+            // 加载通知数量
+            const loadNotificationCount = async () => {
+                try {
+                    const count = await API.getUnreadNotificationCount(currentUser.id);
+                    const badge = document.getElementById('notificationBadge');
+                    if (count > 0) {
+                        badge.textContent = count;
+                        badge.style.display = 'inline';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                } catch (error) {
+                    console.error('Error loading notification count:', error);
+                }
+            };
+            
+            // 加载宠物列表
+            const loadPets = async () => {
+                try {
+                    const petsData = await API.getPets(currentPage, pageSize);
+                    displayPets(petsData.records || petsData);
+                    updatePagination(petsData.total, petsData.pages);
+                } catch (error) {
+                    Utils.showMessage('加载宠物列表失败', true);
+                }
+            };
+            
+            // 搜索宠物
+            const searchPets = async () => {
+                const keyword = document.getElementById('searchKeyword').value;
+                if (!keyword) {
+                    loadPets();
+                    return;
+                }
+                
+                try {
+                    const petsData = await API.searchPets(keyword, currentPage, pageSize);
+                    displayPets(petsData.records || petsData);
+                    updatePagination(petsData.total, petsData.pages);
+                } catch (error) {
+                    Utils.showMessage('搜索宠物失败', true);
+                }
+            };
+            
+            // 筛选宠物
+            const filterPets = async () => {
+                const filters = {
+                    type: document.getElementById('petType').value,
+                    status: document.getElementById('petStatus').value,
+                    startTime: document.getElementById('startTime').value,
+                    endTime: document.getElementById('endTime').value
+                };
+                
+                try {
+                    const petsData = await API.filterPets(filters, currentPage, pageSize);
+                    displayPets(petsData.records || petsData);
+                    updatePagination(petsData.total, petsData.pages);
+                } catch (error) {
+                    Utils.showMessage('筛选宠物失败', true);
+                }
+            };
+            
+            // 显示宠物列表
+            const displayPets = (pets) => {
+                const petsListElement = document.getElementById('petsList');
+                petsListElement.innerHTML = '';
+                
+                if (!pets || pets.length === 0) {
+                    petsListElement.innerHTML = '<p>没有找到宠物记录</p>';
+                    return;
+                }
+                
+                pets.forEach(pet => {
+                    const petCard = document.createElement('div');
+                    petCard.className = 'pet-card';
+                    
+                    const statusClass = pet.status === 'FOUND' ? 'found' : 'lost';
+                    const statusText = pet.status === 'FOUND' ? '已找回' : '走失中';
+                    
+                    petCard.innerHTML = `
+                        <h3>${pet.name} <span class="${statusClass}">${statusText}</span></h3>
+                        <p><strong>类型:</strong> ${pet.type}</p>
+                        <p><strong>品种:</strong> ${pet.breed}</p>
+                        <p><strong>走失时间:</strong> ${Utils.formatDate(pet.lostTime)}</p>
+                        <p><strong>走失地点:</strong> ${pet.lostLocation}</p>
+                        <a href="pet-detail.html?id=${pet.id}" class="btn">查看详情</a>
+                    `;
+                    
+                    petsListElement.appendChild(petCard);
+                });
+            };
+            
+            // 更新分页
+            const updatePagination = (total, pages) => {
+                document.getElementById('currentPage').textContent = currentPage;
+                document.getElementById('prevPage').disabled = currentPage <= 1;
+                document.getElementById('nextPage').disabled = currentPage >= pages;
+            };
+            
+            // 事件监听
+            document.getElementById('searchBtn').addEventListener('click', () => {
+                currentPage = 1;
+                searchPets();
+            });
+            
+            document.getElementById('filterBtn').addEventListener('click', () => {
+                currentPage = 1;
+                filterPets();
+            });
+            
+            document.getElementById('prevPage').addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    loadPets();
+                }
+            });
+            
+            document.getElementById('nextPage').addEventListener('click', () => {
+                currentPage++;
+                loadPets();
+            });
+            
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                Utils.clearCurrentUser();
+                window.location.href = 'login.html';
+            });
+            
+            // 初始化
+            loadNotificationCount();
+            loadPets();
+        });
+    </script>
+</body>
+</html>

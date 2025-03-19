@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>宠物详情 - 宠物走失登记系统</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>宠物走失登记系统</h1>
+            <nav>
+                <ul>
+                    <li><a href="index.html">首页</a></li>
+                    <li><a href="pet-register.html">登记走失</a></li>
+                    <li><a href="my-pets.html">我的宠物</a></li>
+                    <li><a href="notifications.html">通知</a></li>
+                    <li><a href="#" id="logoutBtn">退出登录</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div id="message" style="display: none;"></div>
+        
+        <div id="petDetail">
+            <!-- 宠物详情将在这里加载 -->
+            <div class="loading">加载中...</div>
+        </div>
+        
+        <div id="commentSection">
+            <h2>线索评论</h2>
+            <div id="commentsList">
+                <!-- 评论将在这里加载 -->
+                <div class="loading">加载中...</div>
+            </div>
+            
+            <h3>添加线索</h3>
+            <form id="commentForm">
+                <div class="form-group">
+                    <label for="commentContent">线索内容</label>
+                    <textarea id="commentContent" class="form-control" rows="4" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="commentContact">联系方式</label>
+                    <input type="text" id="commentContact" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="commentAttachments">上传附件</label>
+                    <input type="file" id="commentAttachments" class="form-control" multiple>
+                </div>
+                <button type="submit" class="btn">提交线索</button>
+            </form>
+        </div>
+    </div>
+    
+    <script src="js/utils.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            Utils.redirectIfNotLoggedIn();
+            
+            const currentUser = Utils.getCurrentUser();
+            const urlParams = new URLSearchParams(window.location.search);
+            const petId = urlParams.get('id');
+            
+            if (!petId) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            // 加载宠物详情
+            const loadPetDetail = async () => {
+                try {
+                    const pet = await API.getPetById(petId);
+                    displayPetDetail(pet);
+                } catch (error) {
+                    Utils.showMessage('加载宠物详情失败', true);
+                }
+            };
+            
+            // 显示宠物详情
+            const displayPetDetail = (pet) => {
+                const petDetailElement = document.getElementById('petDetail');
+                
+                const statusClass = pet.status === 'FOUND' ? 'found' : 'lost';
+                const statusText = pet.status === 'FOUND' ? '已找回' : '走失中';
+                
+                let petHtml = `
+                    <h2>${pet.name} <span class="${statusClass}">${statusText}</span></h2>
+                    <div class="pet-info">
+                        <p><strong>类型:</strong> ${pet.type}</p>
+                        <p><strong>品种:</strong> ${pet.breed}</p>
+                        <p><strong>性别:</strong> ${pet.gender || '未知'}</p>
+                        <p><strong>颜色:</strong> ${pet.color || '未知'}</p>
+                        <p><strong>出生日期:</strong> ${pet.birthDate ? Utils.formatDate(pet.birthDate) : '未知'}</p>
+                        <p><strong>描述:</strong> ${pet.description || '无'}</p>
+                        <p><strong>走失时间:</strong> ${Utils.formatDate(pet.lostTime)}</p>
+                        <p><strong>走失地点:</strong> ${pet.lostLocation}</p>
+                        <p><strong>联系方式:</strong> ${pet.contact}</p>
+                    </div>
+                `;
+                
+                // 如果当前用户是宠物主人，显示标记为已找回的按钮
+                if (pet.ownerId === currentUser.id && pet.status !== 'FOUND') {
+                    petHtml += `<button id="markAsFoundBtn" class="btn">标记为已找回</button>`;
+                }
+                
+                petDetailElement.innerHTML = petHtml;
+                
+                // 添加标记为已找回的事件监听
+                const markAsFoundBtn = document.getElementById('markAsFoundBtn');
+                if (markAsFoundBtn) {
+                    markAsFoundBtn.addEventListener('click', async () => {
+                        try {
+                            const response = await API.markPetAsFound(petId);
+                            if (response.success) {
+                                Utils.showMessage('已成功标记为找回');
+                                loadPetDetail(); // 重新加载宠物详情
+                            } else {
+                                Utils.showMessage(response.message || '标记失败', true);
+                            }
+                        } catch (error) {
+                            Utils.showMessage('标记失败，请稍后重试', true);
+                        }
+                    });
+                }
+            };
+            
+            // 加载评论
+            const loadComments = async () => {
+                try {
+                    const comments = await API.getCommentsByPetId(petId);
+                    displayComments(comments.records || comments);
+                } catch (error) {
+                    Utils.showMessage('加载评论失败', true);
+                }
+            };
+            
+            // 显示评论
+            const displayComments = (comments) => {
+                const commentsListElement = document.getElementById('commentsList');
+                
+                if (!comments || comments.length === 0) {
+                    commentsListElement.innerHTML = '<p>暂无线索评论</p>';
+                    return;
+                }
+                
+                let commentsHtml = '';
+                
+                comments.forEach(comment => {
+                    const isUsefulClass = comment.isUseful ? 'useful' : '';
+                    
+                    commentsHtml += `
+                        <div class="comment ${isUsefulClass}" data-id="${comment.id}">
+                            <p>${comment.content}</p>
+                            <p><strong>联系方式:</strong> ${comment.contact}</p>
+                            <p><small>评论时间: ${Utils.formatDate(comment.createTime)}</small></p>
+                    `;
+                    
+                    // 如果有附件，显示附件
+                    if (comment.attachments && comment.attachments.length > 0) {
+                        commentsHtml += '<div class="attachments">';
+                        comment.attachments.forEach(attachment => {
+                            if (['jpg', 'jpeg', 'png', 'gif'].includes(attachment.fileType.toLowerCase())) {
+                                commentsHtml += `<img src="${attachment.filePath}" alt="附件" class="attachment-img">`;
+                            } else {
+                                commentsHtml += `<a href="${attachment.filePath}" target="_blank" class="attachment-link">${attachment.fileName}</a>`;
+                            }
+                        });
+                        commentsHtml += '</div>';
+                    }
+                    
+                    // 如果当前用户是宠物主人，显示标记为有用的按钮
+                    const pet = document.getElementById('petDetail').querySelector('h2').textContent;
+                    if (pet && pet.ownerId === currentUser.id && !comment.isUseful) {
+                        commentsHtml += `<button class="btn mark-useful-btn" data-id="${comment.id}">标记为有用</button>`;
+                    }
+                    
+                    commentsHtml += '</div>';
+                });
+                
+                commentsListElement.innerHTML = commentsHtml;
+                
+                // 添加标记为有用的事件监听
+                document.querySelectorAll('.mark-useful-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        const commentId = e.target.getAttribute('data-id');
+                        try {
+                            const response = await API.markCommentAsUseful(commentId);
+                            if (response.success) {
+                                Utils.showMessage('已标记为有用');
+                                loadComments(); // 重新加载评论
+                            } else {
+                                Utils.showMessage(response.message || '标记失败', true);
+                            }
+                        } catch (error) {
+                            Utils.showMessage('标记失败，请稍后重试', true);
+                        }
+                    });
+                });
+            };
+            
+            // 提交评论
+            const submitComment = async (e) => {
+                e.preventDefault();
+                
+                const content = document.getElementById('commentContent').value;
+                const contact = document.getElementById('commentContact').value;
+                const attachmentFiles = document.getElementById('commentAttachments').files;
+                
+                try {
+                    // 创建评论
+                    const commentData = {
+                        content,
+                        contact,
+                        petId: parseInt(petId),
+                        userId: currentUser.id
+                    };
+                    
+                    const response = await API.createComment(commentData);
+                    
+                    if (response.id) {
+                        // 如果有附件，上传附件
+                        if (attachmentFiles.length > 0) {
+                            await API.uploadAttachments(response.id, attachmentFiles);
+                        }
+                        
+                        Utils.showMessage('线索提交成功');
+                        document.getElementById('commentForm').reset();
+                        loadComments(); // 重新加载评论
+                    } else {
+                        Utils.showMessage(response.message || '线索提交失败', true);
+                    }
+                } catch (error) {
+                    Utils.showMessage('线索提交失败，请稍后重试', true);
+                }
+            };
+            
+            // 事件监听
+            document.getElementById('commentForm').addEventListener('submit', submitComment);
+            
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                Utils.clearCurrentUser();
+                window.location.href = 'login.html';
+            });
+            
+            // 初始化
+            loadPetDetail();
+            loadComments();
+        });
+    </script>
+</body>
+</html>
