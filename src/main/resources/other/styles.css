@@ -1,0 +1,199 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+body {
+    background-color: #f5f5f5;
+    padding: 20px;
+    color: #333;
+}
+
+.container {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 16px;
+    overflow: hidden;
+}
+
+.header-card {
+    background-color: #dc3545;
+    color: white;
+}
+
+.header {
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.title-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+h1 {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+h2 {
+    font-size: 16px;
+    margin-bottom: 12px;
+    color: #333;
+}
+
+.btn {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    border: none;
+}
+
+.btn-outline {
+    background-color: transparent;
+    border: 1px solid white;
+    color: white;
+}
+
+.btn-primary {
+    background-color: #dc3545;
+    color: white;
+    padding: 6px 12px;
+}
+
+.btn-secondary {
+    background-color: white;
+    border: 1px solid #dc3545;
+    color: #dc3545;
+    padding: 6px 12px;
+}
+
+.main-card {
+    padding: 16px;
+}
+
+.timeline-section {
+    margin-bottom: 20px;
+}
+
+.timeline {
+    position: relative;
+    padding-left: 10px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 0;
+    height: 100%;
+    width: 2px;
+    background-color: #eee;
+}
+
+.timeline-item {
+    position: relative;
+    padding-left: 30px;
+    margin-bottom: 16px;
+}
+
+.timeline-dot {
+    position: absolute;
+    left: 0;
+    top: 4px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: #dc3545;
+}
+
+.timeline-date {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 4px;
+}
+
+.timeline-text {
+    font-size: 14px;
+}
+
+.violation-info h2 {
+    margin-top: 10px;
+    margin-bottom: 15px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    row-gap: 15px;
+    column-gap: 10px;
+    align-items: center;
+}
+
+.info-label {
+    font-size: 14px;
+    color: #666;
+    text-align: left;
+}
+
+.info-value {
+    font-size: 14px;
+}
+
+.status-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    background-color: #dc3545;
+    color: white;
+    border-radius: 4px;
+    font-size: 12px;
+    width: fit-content;
+}
+
+.action-card {
+    padding: 16px;
+}
+
+.warning-box {
+    background-color: #ffebee;
+    border-radius: 4px;
+    padding: 12px;
+    margin-bottom: 16px;
+}
+
+.warning-title {
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #dc3545;
+}
+
+.warning-content {
+    font-size: 14px;
+    color: #333;
+    line-height: 1.5;
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.btn-primary, .btn-secondary {
+    padding: 6px 12px;
+    font-size: 14px;
+}
