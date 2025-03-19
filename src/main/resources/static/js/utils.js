@@ -1,9 +1,11 @@
 // API utilities
+const API_BASE_URL = 'http://localhost:8081';
+
 const API = {
     // Authentication
     login: async (username, password) => {
         try {
-            const response = await fetch('/auth/login', {
+            const response = await fetch(`${API_BASE_URL}/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password })
@@ -17,7 +19,7 @@ const API = {
     
     register: async (userData) => {
         try {
-            const response = await fetch('/auth/register', {
+            const response = await fetch(`${API_BASE_URL}/auth/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(userData)
@@ -32,7 +34,7 @@ const API = {
     // Pets
     getPets: async (page = 1, size = 10) => {
         try {
-            const response = await fetch(`/pets?page=${page}&size=${size}`);
+            const response = await fetch(`${API_BASE_URL}/pets?page=${page}&size=${size}`);
             return await response.json();
         } catch (error) {
             console.error('Error fetching pets:', error);
@@ -42,7 +44,7 @@ const API = {
     
     getPetById: async (id) => {
         try {
-            const response = await fetch(`/pets/${id}`);
+            const response = await fetch(`${API_BASE_URL}/pets/${id}`);
             return await response.json();
         } catch (error) {
             console.error(`Error fetching pet ${id}:`, error);
@@ -52,7 +54,7 @@ const API = {
     
     createPet: async (petData) => {
         try {
-            const response = await fetch('/pets', {
+            const response = await fetch(`${API_BASE_URL}/pets`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(petData)
@@ -66,7 +68,7 @@ const API = {
     
     searchPets: async (keyword, page = 1, size = 10) => {
         try {
-            const response = await fetch(`/pets/search?keyword=${encodeURIComponent(keyword)}&page=${page}&size=${size}`);
+            const response = await fetch(`${API_BASE_URL}/pets/search?keyword=${encodeURIComponent(keyword)}&page=${page}&size=${size}`);
             return await response.json();
         } catch (error) {
             console.error('Error searching pets:', error);
@@ -76,7 +78,7 @@ const API = {
     
     filterPets: async (filters, page = 1, size = 10) => {
         try {
-            let url = `/pets/filter?page=${page}&size=${size}`;
+            let url = `${API_BASE_URL}/pets/filter?page=${page}&size=${size}`;
             if (filters.type) url += `&type=${encodeURIComponent(filters.type)}`;
             if (filters.status) url += `&status=${encodeURIComponent(filters.status)}`;
             if (filters.startTime) url += `&startTime=${encodeURIComponent(filters.startTime)}`;
@@ -92,7 +94,7 @@ const API = {
     
     markPetAsFound: async (id) => {
         try {
-            const response = await fetch(`/pets/${id}/found`, {
+            const response = await fetch(`${API_BASE_URL}/pets/${id}/found`, {
                 method: 'PUT'
             });
             return await response.json();
@@ -105,7 +107,7 @@ const API = {
     // Comments
     getCommentsByPetId: async (petId, page = 1, size = 10) => {
         try {
-            const response = await fetch(`/comments/pet/${petId}?page=${page}&size=${size}`);
+            const response = await fetch(`${API_BASE_URL}/comments/pet/${petId}?page=${page}&size=${size}`);
             return await response.json();
         } catch (error) {
             console.error(`Error fetching comments for pet ${petId}:`, error);
@@ -115,7 +117,7 @@ const API = {
     
     createComment: async (commentData) => {
         try {
-            const response = await fetch('/comments', {
+            const response = await fetch(`${API_BASE_URL}/comments`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(commentData)
@@ -134,7 +136,7 @@ const API = {
                 formData.append('files', files[i]);
             }
             
-            const response = await fetch(`/comments/${commentId}/attachments`, {
+            const response = await fetch(`${API_BASE_URL}/comments/${commentId}/attachments`, {
                 method: 'POST',
                 body: formData
             });
@@ -147,7 +149,7 @@ const API = {
     
     markCommentAsUseful: async (id) => {
         try {
-            const response = await fetch(`/comments/${id}/useful`, {
+            const response = await fetch(`${API_BASE_URL}/comments/${id}/useful`, {
                 method: 'PUT'
             });
             return await response.json();
@@ -160,7 +162,7 @@ const API = {
     // Notifications
     getUserNotifications: async (userId, page = 1, size = 10) => {
         try {
-            const response = await fetch(`/notifications/user/${userId}?page=${page}&size=${size}`);
+            const response = await fetch(`${API_BASE_URL}/notifications/user/${userId}?page=${page}&size=${size}`);
             return await response.json();
         } catch (error) {
             console.error(`Error fetching notifications for user ${userId}:`, error);
@@ -170,7 +172,7 @@ const API = {
     
     getUnreadNotificationCount: async (userId) => {
         try {
-            const response = await fetch(`/notifications/user/${userId}/unread/count`);
+            const response = await fetch(`${API_BASE_URL}/notifications/user/${userId}/unread/count`);
             return await response.json();
         } catch (error) {
             console.error(`Error fetching unread notification count for user ${userId}:`, error);
@@ -180,7 +182,7 @@ const API = {
     
     markNotificationAsRead: async (id) => {
         try {
-            const response = await fetch(`/notifications/${id}/read`, {
+            const response = await fetch(`${API_BASE_URL}/notifications/${id}/read`, {
                 method: 'PUT'
             });
             return await response.json();
@@ -192,7 +194,7 @@ const API = {
     
     markAllNotificationsAsRead: async (userId) => {
         try {
-            const response = await fetch(`/notifications/user/${userId}/read/all`, {
+            const response = await fetch(`${API_BASE_URL}/notifications/user/${userId}/read/all`, {
                 method: 'PUT'
             });
             return await response.json();
