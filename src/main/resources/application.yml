@@ -1,12 +1,22 @@
 spring:
   application:
     name: langchain4j-demo
-  # MySQL数据库连接配置
+  # H2内存数据库配置
   datasource:
-    driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/test?useSSL=false&characterEncoding=utf-8
-    username: root
-    password: 123456
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:testdb;MODE=MySQL;DB_CLOSE_DELAY=-1
+    username: sa
+    password: 
+  # 启用H2控制台
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  # 初始化数据库
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
   # MyBatis-Plus配置
   mybatis-plus:
     mapper-locations: classpath:mapper/*.xml
