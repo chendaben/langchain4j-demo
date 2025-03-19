@@ -54,7 +54,10 @@
     
     <script src="js/utils.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Initialize API configuration
+            await API.init();
+            
             Utils.redirectIfLoggedIn();
             
             const registerForm = document.getElementById('registerForm');

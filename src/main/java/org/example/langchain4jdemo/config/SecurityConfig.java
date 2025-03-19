@@ -20,18 +20,14 @@ public class SecurityConfig {
             .csrf().disable()
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                .requestMatchers("/api/config").permitAll()
+                .requestMatchers("/css/**", "/js/**", "/images/**", "/*.html", "/favicon.ico").permitAll()
                 .requestMatchers("/comments/admin/**", "/notifications/system/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
-            .formLogin()
-                .loginPage("/auth/login")
-                .defaultSuccessUrl("/")
-                .permitAll()
-            .and()
-            .logout()
-                .logoutUrl("/auth/logout")
-                .logoutSuccessUrl("/auth/login")
-                .permitAll();
+            .formLogin().disable()
+            .logout().disable()
+            .httpBasic().disable();
         
         return http.build();
     }
