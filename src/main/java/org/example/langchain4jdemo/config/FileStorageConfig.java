@@ -21,10 +21,11 @@ public class FileStorageConfig {
     }
     
     @Bean
-    public void createUploadDirectory() {
+    public File createUploadDirectory() {
         File directory = new File(uploadDir);
         if (!directory.exists()) {
             directory.mkdirs();
         }
+        return directory;
     }
 }

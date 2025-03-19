@@ -8,10 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.langchain4jdemo.service.FileService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -19,8 +16,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/upload")
-@Tag(name = "文件上传", description = "文件上传相关接口")
+@RequestMapping("/files")
+@Tag(name = "文件管理", description = "文件上传下载相关接口")
 public class FileController {
 
     private final FileService fileService;
@@ -31,22 +28,26 @@ public class FileController {
 
     @Operation(
         summary = "上传文件",
-        description = "上传文件到服务器",
+        description = "上传单个文件到服务器",
         responses = {
             @ApiResponse(
-                responseCode = "200", 
-                description = "上传成功", 
+                responseCode = "200",
+                description = "上传成功",
                 content = @Content(schema = @Schema(implementation = Map.class))
             ),
             @ApiResponse(
-                responseCode = "400", 
-                description = "上传失败"
+                responseCode = "400",
+                description = "文件为空或格式错误"
             )
         }
     )
-    @PostMapping
+    @PostMapping(value = "/upload", consumes = "multipart/form-data")
     public ResponseEntity<Map<String, Object>> uploadFile(
-            @Parameter(description = "要上传的文件", required = true) 
+            @Parameter(
+                description = "要上传的文件",
+                required = true,
+                content = @Content(mediaType = "multipart/form-data")
+            ) 
             @RequestParam("file") MultipartFile file) {
         
         Map<String, Object> response = new HashMap<>();
