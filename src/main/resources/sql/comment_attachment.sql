@@ -6,6 +6,5 @@ CREATE TABLE IF NOT EXISTS comment_attachment (
     file_path VARCHAR(255) COMMENT '文件路径',
     file_type VARCHAR(50) COMMENT '文件类型',
     file_size BIGINT COMMENT '文件大小(字节)',
-    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    FOREIGN KEY (comment_id) REFERENCES comment(id) ON DELETE CASCADE
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间'
 );
