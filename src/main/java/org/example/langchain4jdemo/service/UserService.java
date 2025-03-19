@@ -32,15 +32,11 @@ public class UserService {
     }
     
     public boolean existsByUsername(String username) {
-        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(User::getUsername, username);
-        return userMapper.selectCount(queryWrapper) > 0;
+        return userMapper.countByUsername(username) > 0;
     }
     
     public User getUserByUsername(String username) {
-        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(User::getUsername, username);
-        return userMapper.selectOne(queryWrapper);
+        return userMapper.findByUsername(username);
     }
     
     @Transactional
