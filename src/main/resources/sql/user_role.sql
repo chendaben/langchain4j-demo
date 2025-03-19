@@ -3,8 +3,7 @@ CREATE TABLE IF NOT EXISTS user_role (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT COMMENT '用户ID',
     role VARCHAR(50) COMMENT '角色：ADMIN-管理员，OWNER-宠物主人，USER-普通用户',
-    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    FOREIGN KEY (user_id) REFERENCES user(id)
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间'
 );
 
 -- 修改用户表，添加登录相关字段

@@ -7,6 +7,5 @@ CREATE TABLE IF NOT EXISTS notification (
     type VARCHAR(50) COMMENT '通知类型：COMMENT-评论通知，SYSTEM-系统通知',
     related_id INT COMMENT '相关ID（如评论ID）',
     is_read BOOLEAN DEFAULT FALSE COMMENT '是否已读',
-    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    FOREIGN KEY (user_id) REFERENCES user(id)
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间'
 );
