@@ -117,7 +117,7 @@ public class NotificationService extends ServiceImpl<NotificationMapper, Notific
         LambdaQueryWrapper<Notification> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Notification::getUserId, userId);
         queryWrapper.eq(Notification::getIsRead, false);
-        return this.count(queryWrapper);
+        return (int) this.count(queryWrapper);
     }
 
     /**
