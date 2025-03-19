@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登记走失宠物 - 宠物走失登记系统</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>宠物走失登记系统</h1>
+            <nav>
+                <ul>
+                    <li><a href="index.html">首页</a></li>
+                    <li><a href="pet-register.html">登记走失</a></li>
+                    <li><a href="my-pets.html">我的宠物</a></li>
+                    <li><a href="notifications.html">通知</a></li>
+                    <li><a href="#" id="logoutBtn">退出登录</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    
+    <div class="container">
+        <h2>登记走失宠物</h2>
+        <div id="message" style="display: none;"></div>
+        
+        <form id="petRegisterForm">
+            <div class="form-group">
+                <label for="petName">宠物名称</label>
+                <input type="text" id="petName" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="petType">宠物类型</label>
+                <select id="petType" class="form-control" required>
+                    <option value="">请选择</option>
+                    <option value="狗">狗</option>
+                    <option value="猫">猫</option>
+                    <option value="鸟">鸟</option>
+                    <option value="其他">其他</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="petBreed">宠物品种</label>
+                <input type="text" id="petBreed" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="petGender">宠物性别</label>
+                <select id="petGender" class="form-control">
+                    <option value="">未知</option>
+                    <option value="公">公</option>
+                    <option value="母">母</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="petColor">宠物颜色</label>
+                <input type="text" id="petColor" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="petBirthDate">出生日期</label>
+                <input type="date" id="petBirthDate" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="petDescription">宠物描述</label>
+                <textarea id="petDescription" class="form-control" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="lostTime">走失时间</label>
+                <input type="datetime-local" id="lostTime" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="lostLocation">走失地点</label>
+                <input type="text" id="lostLocation" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="contact">联系方式</label>
+                <input type="text" id="contact" class="form-control" required>
+            </div>
+            <button type="submit" class="btn">提交登记</button>
+        </form>
+    </div>
+    
+    <script src="js/utils.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            Utils.redirectIfNotLoggedIn();
+            
+            const currentUser = Utils.getCurrentUser();
+            
+            // 提交表单
+            const petRegisterForm = document.getElementById('petRegisterForm');
+            
+            petRegisterForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const petData = {
+                    name: document.getElementById('petName').value,
+                    type: document.getElementById('petType').value,
+                    breed: document.getElementById('petBreed').value,
+                    gender: document.getElementById('petGender').value,
+                    color: document.getElementById('petColor').value,
+                    birthDate: document.getElementById('petBirthDate').value || null,
+                    description: document.getElementById('petDescription').value,
+                    lostTime: document.getElementById('lostTime').value,
+                    lostLocation: document.getElementById('lostLocation').value,
+                    contact: document.getElementById('contact').value,
+                    status: 'LOST',
+                    ownerId: currentUser.id
+                };
+                
+                try {
+                    const response = await API.createPet(petData);
+                    
+                    if (response.id) {
+                        Utils.showMessage('宠物走失信息登记成功');
+                        setTimeout(() => {
+                            window.location.href = `pet-detail.html?id=${response.id}`;
+                        }, 2000);
+                    } else {
+                        Utils.showMessage(response.message || '登记失败', true);
+                    }
+                } catch (error) {
+                    Utils.showMessage('登记失败，请稍后重试', true);
+                }
+            });
+            
+            // 退出登录
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                Utils.clearCurrentUser();
+                window.location.href = 'login.html';
+            });
+        });
+    </script>
+</body>
+</html>

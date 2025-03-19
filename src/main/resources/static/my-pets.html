@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的宠物 - 宠物走失登记系统</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>宠物走失登记系统</h1>
+            <nav>
+                <ul>
+                    <li><a href="index.html">首页</a></li>
+                    <li><a href="pet-register.html">登记走失</a></li>
+                    <li><a href="my-pets.html">我的宠物</a></li>
+                    <li><a href="notifications.html">通知</a></li>
+                    <li><a href="#" id="logoutBtn">退出登录</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    
+    <div class="container">
+        <h2>我的宠物</h2>
+        <div id="message" style="display: none;"></div>
+        
+        <div class="my-pets-section">
+            <div id="myPetsList">
+                <!-- 我的宠物列表将在这里加载 -->
+                <div class="loading">加载中...</div>
+            </div>
+            
+            <div class="pagination">
+                <button id="prevPage" class="btn">上一页</button>
+                <span id="currentPage">1</span>
+                <button id="nextPage" class="btn">下一页</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="js/utils.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            Utils.redirectIfNotLoggedIn();
+            
+            const currentUser = Utils.getCurrentUser();
+            let currentPage = 1;
+            const pageSize = 10;
+            
+            // 加载我的宠物列表
+            const loadMyPets = async () => {
+                try {
+                    // 假设API中有一个方法可以获取用户的宠物列表
+                    // 如果没有，可以使用过滤方式实现
+                    const response = await fetch(`/pets/owner/${currentUser.id}?page=${currentPage}&size=${pageSize}`);
+                    const petsData = await response.json();
+                    
+                    displayMyPets(petsData.records || petsData);
+                    updatePagination(petsData.total, petsData.pages);
+                } catch (error) {
+                    console.error('Error loading my pets:', error);
+                    
+                    // 如果没有专门的API，可以获取所有宠物然后在前端过滤
+                    try {
+                        const allPets = await API.getPets(1, 100); // 获取较多的宠物
+                        const myPets = (allPets.records || allPets).filter(pet => pet.ownerId === currentUser.id);
+                        
+                        displayMyPets(myPets);
+                        // 简单分页
+                        const totalPages = Math.ceil(myPets.length / pageSize);
+                        updatePagination(myPets.length, totalPages);
+                    } catch (fallbackError) {
+                        Utils.showMessage('加载宠物列表失败', true);
+                    }
+                }
+            };
+            
+            // 显示我的宠物列表
+            const displayMyPets = (pets) => {
+                const myPetsListElement = document.getElementById('myPetsList');
+                myPetsListElement.innerHTML = '';
+                
+                if (!pets || pets.length === 0) {
+                    myPetsListElement.innerHTML = '<p>您还没有登记过宠物</p>';
+                    return;
+                }
+                
+                pets.forEach(pet => {
+                    const petCard = document.createElement('div');
+                    petCard.className = 'pet-card';
+                    
+                    const statusClass = pet.status === 'FOUND' ? 'found' : 'lost';
+                    const statusText = pet.status === 'FOUND' ? '已找回' : '走失中';
+                    
+                    petCard.innerHTML = `
+                        <h3>${pet.name} <span class="${statusClass}">${statusText}</span></h3>
+                        <p><strong>类型:</strong> ${pet.type}</p>
+                        <p><strong>品种:</strong> ${pet.breed}</p>
+                        <p><strong>走失时间:</strong> ${Utils.formatDate(pet.lostTime)}</p>
+                        <p><strong>走失地点:</strong> ${pet.lostLocation}</p>
+                        <div class="pet-actions">
+                            <a href="pet-detail.html?id=${pet.id}" class="btn">查看详情</a>
+                            ${pet.status !== 'FOUND' ? `<button class="btn mark-found-btn" data-id="${pet.id}">标记为已找回</button>` : ''}
+                        </div>
+                    `;
+                    
+                    myPetsListElement.appendChild(petCard);
+                });
+                
+                // 添加标记为已找回的事件监听
+                document.querySelectorAll('.mark-found-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        const petId = e.target.getAttribute('data-id');
+                        try {
+                            const response = await API.markPetAsFound(petId);
+                            if (response.success) {
+                                Utils.showMessage('已成功标记为找回');
+                                loadMyPets(); // 重新加载宠物列表
+                            } else {
+                                Utils.showMessage(response.message || '标记失败', true);
+                            }
+                        } catch (error) {
+                            Utils.showMessage('标记失败，请稍后重试', true);
+                        }
+                    });
+                });
+            };
+            
+            // 更新分页
+            const updatePagination = (total, pages) => {
+                document.getElementById('currentPage').textContent = currentPage;
+                document.getElementById('prevPage').disabled = currentPage <= 1;
+                document.getElementById('nextPage').disabled = currentPage >= pages;
+            };
+            
+            // 事件监听
+            document.getElementById('prevPage').addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    loadMyPets();
+                }
+            });
+            
+            document.getElementById('nextPage').addEventListener('click', () => {
+                currentPage++;
+                loadMyPets();
+            });
+            
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                Utils.clearCurrentUser();
+                window.location.href = 'login.html';
+            });
+            
+            // 初始化
+            loadMyPets();
+        });
+    </script>
+</body>
+</html>

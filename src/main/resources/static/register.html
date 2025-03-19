@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>注册 - 宠物走失登记系统</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>宠物走失登记系统</h1>
+        </div>
+    </header>
+    
+    <div class="container">
+        <h2>用户注册</h2>
+        <div id="message" style="display: none;"></div>
+        
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="username">用户名</label>
+                <input type="text" id="username" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="password">密码</label>
+                <input type="password" id="password" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="name">姓名</label>
+                <input type="text" id="name" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="email">邮箱</label>
+                <input type="email" id="email" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">手机号</label>
+                <input type="tel" id="phone" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="gender">性别</label>
+                <select id="gender" class="form-control">
+                    <option value="男">男</option>
+                    <option value="女">女</option>
+                    <option value="其他">其他</option>
+                </select>
+            </div>
+            <button type="submit" class="btn">注册</button>
+        </form>
+        
+        <p>已有账号？<a href="login.html">立即登录</a></p>
+    </div>
+    
+    <script src="js/utils.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            Utils.redirectIfLoggedIn();
+            
+            const registerForm = document.getElementById('registerForm');
+            
+            registerForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const userData = {
+                    username: document.getElementById('username').value,
+                    password: document.getElementById('password').value,
+                    name: document.getElementById('name').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value,
+                    gender: document.getElementById('gender').value
+                };
+                
+                try {
+                    const response = await API.register(userData);
+                    if (response.message === '注册成功') {
+                        Utils.showMessage('注册成功，请登录');
+                        setTimeout(() => {
+                            window.location.href = 'login.html';
+                        }, 2000);
+                    } else {
+                        Utils.showMessage(response.message || '注册失败', true);
+                    }
+                } catch (error) {
+                    Utils.showMessage('注册失败，请稍后重试', true);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

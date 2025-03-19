@@ -1,0 +1,114 @@
+/* Global Styles */
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    color: #333;
+    background-color: #f4f4f4;
+}
+
+.container {
+    width: 80%;
+    margin: auto;
+    overflow: hidden;
+    padding: 20px;
+}
+
+/* Header */
+header {
+    background: #35424a;
+    color: white;
+    padding: 20px;
+    border-bottom: #e8491d 3px solid;
+}
+
+header a {
+    color: white;
+    text-decoration: none;
+}
+
+header ul {
+    padding: 0;
+    list-style: none;
+}
+
+header li {
+    display: inline;
+    padding: 0 20px;
+}
+
+/* Forms */
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.btn {
+    display: inline-block;
+    background: #e8491d;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.btn:hover {
+    background: #cc3b19;
+}
+
+/* Pet Cards */
+.pet-card {
+    background: white;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.pet-card h3 {
+    margin-top: 0;
+    color: #e8491d;
+}
+
+/* Comments */
+.comment {
+    background: #f9f9f9;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-left: 3px solid #e8491d;
+}
+
+.useful {
+    border-left: 3px solid #28a745;
+}
+
+/* Notifications */
+.notification {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+}
+
+.unread {
+    background: #e2f3ff;
+}
+
+/* Responsive */
+@media(max-width: 768px) {
+    header li {
+        display: block;
+        padding: 10px 0;
+    }
+    
+    .container {
+        width: 95%;
+    }
+}

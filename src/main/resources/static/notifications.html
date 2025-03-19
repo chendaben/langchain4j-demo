@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>通知 - 宠物走失登记系统</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>宠物走失登记系统</h1>
+            <nav>
+                <ul>
+                    <li><a href="index.html">首页</a></li>
+                    <li><a href="pet-register.html">登记走失</a></li>
+                    <li><a href="my-pets.html">我的宠物</a></li>
+                    <li><a href="notifications.html">通知</a></li>
+                    <li><a href="#" id="logoutBtn">退出登录</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    
+    <div class="container">
+        <h2>我的通知</h2>
+        <div id="message" style="display: none;"></div>
+        
+        <button id="markAllReadBtn" class="btn">全部标记为已读</button>
+        
+        <div id="notificationsList">
+            <!-- 通知列表将在这里加载 -->
+            <div class="loading">加载中...</div>
+        </div>
+        
+        <div class="pagination">
+            <button id="prevPage" class="btn">上一页</button>
+            <span id="currentPage">1</span>
+            <button id="nextPage" class="btn">下一页</button>
+        </div>
+    </div>
+    
+    <script src="js/utils.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            Utils.redirectIfNotLoggedIn();
+            
+            const currentUser = Utils.getCurrentUser();
+            let currentPage = 1;
+            const pageSize = 10;
+            
+            // 加载通知列表
+            const loadNotifications = async () => {
+                try {
+                    const notificationsData = await API.getUserNotifications(currentUser.id, currentPage, pageSize);
+                    displayNotifications(notificationsData.records || notificationsData);
+                    updatePagination(notificationsData.total, notificationsData.pages);
+                } catch (error) {
+                    Utils.showMessage('加载通知失败', true);
+                }
+            };
+            
+            // 显示通知列表
+            const displayNotifications = (notifications) => {
+                const notificationsListElement = document.getElementById('notificationsList');
+                notificationsListElement.innerHTML = '';
+                
+                if (!notifications || notifications.length === 0) {
+                    notificationsListElement.innerHTML = '<p>暂无通知</p>';
+                    return;
+                }
+                
+                notifications.forEach(notification => {
+                    const notificationElement = document.createElement('div');
+                    notificationElement.className = `notification ${notification.isRead ? '' : 'unread'}`;
+                    notificationElement.setAttribute('data-id', notification.id);
+                    
+                    const typeText = notification.type === 'COMMENT' ? '评论通知' : '系统通知';
+                    
+                    notificationElement.innerHTML = `
+                        <h3>${notification.title} <span class="notification-type">${typeText}</span></h3>
+                        <p>${notification.content}</p>
+                        <p><small>时间: ${Utils.formatDate(notification.createTime)}</small></p>
+                        ${!notification.isRead ? '<button class="btn mark-read-btn">标记为已读</button>' : ''}
+                    `;
+                    
+                    notificationsListElement.appendChild(notificationElement);
+                });
+                
+                // 添加标记为已读的事件监听
+                document.querySelectorAll('.mark-read-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        const notificationElement = e.target.closest('.notification');
+                        const notificationId = notificationElement.getAttribute('data-id');
+                        
+                        try {
+                            const response = await API.markNotificationAsRead(notificationId);
+                            if (response === '通知已标记为已读' || response.success) {
+                                notificationElement.classList.remove('unread');
+                                e.target.remove();
+                                Utils.showMessage('已标记为已读');
+                            } else {
+                                Utils.showMessage(response.message || '标记失败', true);
+                            }
+                        } catch (error) {
+                            Utils.showMessage('标记失败，请稍后重试', true);
+                        }
+                    });
+                });
+            };
+            
+            // 更新分页
+            const updatePagination = (total, pages) => {
+                document.getElementById('currentPage').textContent = currentPage;
+                document.getElementById('prevPage').disabled = currentPage <= 1;
+                document.getElementById('nextPage').disabled = currentPage >= pages;
+            };
+            
+            // 标记所有通知为已读
+            const markAllAsRead = async () => {
+                try {
+                    const response = await API.markAllNotificationsAsRead(currentUser.id);
+                    if (response.markedCount > 0 || response.success) {
+                        Utils.showMessage(`已将${response.markedCount || '所有'}条通知标记为已读`);
+                        loadNotifications(); // 重新加载通知列表
+                    } else {
+                        Utils.showMessage(response.message || '没有未读通知', true);
+                    }
+                } catch (error) {
+                    Utils.showMessage('操作失败，请稍后重试', true);
+                }
+            };
+            
+            // 事件监听
+            document.getElementById('markAllReadBtn').addEventListener('click', markAllAsRead);
+            
+            document.getElementById('prevPage').addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    loadNotifications();
+                }
+            });
+            
+            document.getElementById('nextPage').addEventListener('click', () => {
+                currentPage++;
+                loadNotifications();
+            });
+            
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                Utils.clearCurrentUser();
+                window.location.href = 'login.html';
+            });
+            
+            // 初始化
+            loadNotifications();
+        });
+    </script>
+</body>
+</html>
