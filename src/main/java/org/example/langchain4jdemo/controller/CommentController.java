@@ -8,6 +8,7 @@ import org.example.langchain4jdemo.entity.Comment;
 import org.example.langchain4jdemo.entity.CommentAttachment;
 import org.example.langchain4jdemo.service.CommentAttachmentService;
 import org.example.langchain4jdemo.service.CommentService;
+import org.example.langchain4jdemo.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +34,9 @@ public class CommentController {
 
     @Autowired
     private CommentAttachmentService commentAttachmentService;
+    
+    @Autowired
+    private NotificationService notificationService;
 
     /**
      * 获取宠物评论列表
@@ -70,6 +74,8 @@ public class CommentController {
         comment.setUpdateTime(LocalDateTime.now());
 
         Integer commentId = commentService.addComment(comment);
+        
+        notificationService.createCommentNotification(comment);
         
         Map<String, Object> response = new HashMap<>();
         response.put("id", commentId);
